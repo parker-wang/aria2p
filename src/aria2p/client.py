@@ -351,7 +351,8 @@ class Client:
         Returns:
             The answer from the server, as a Python dictionary.
         """
-        return requests.post(self.server, data=payload, timeout=self.timeout).json()
+        headers = {'Accept': 'application/json'}
+        return requests.post(self.server, data=payload, timeout=self.timeout, headers=headers).json()
 
     @staticmethod
     def response_as_exception(response: dict) -> ClientException:
