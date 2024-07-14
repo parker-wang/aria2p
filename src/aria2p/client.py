@@ -19,6 +19,7 @@ DEFAULT_ID = -1
 DEFAULT_HOST = "http://localhost"
 DEFAULT_PORT = 6800
 DEFAULT_TIMEOUT: float = 60.0
+DEFAULT_PATH: str = 'jsonrpc'
 
 JSONRPC_PARSER_ERROR = -32700
 JSONRPC_INVALID_REQUEST = -32600
@@ -181,11 +182,12 @@ class Client:
     ]
 
     def __init__(
-        self,
-        host: str = DEFAULT_HOST,
-        port: int = DEFAULT_PORT,
-        secret: str = "",
-        timeout: float = DEFAULT_TIMEOUT,
+            self,
+            host: str = DEFAULT_HOST,
+            port: int = DEFAULT_PORT,
+            secret: str = "",
+            timeout: float = DEFAULT_TIMEOUT,
+            path: str = DEFAULT_PATH
     ) -> None:
         """Initialize the object.
 
@@ -202,6 +204,7 @@ class Client:
         self.secret = secret
         self.timeout = timeout
         self.listening = False
+        self.path = path
 
     def __str__(self):
         return self.server
@@ -216,7 +219,7 @@ class Client:
         Returns:
             The server address.
         """
-        return f"{self.host}:{self.port}/jsonrpc"
+        return f"{self.host}:{self.port}/{self.path}"
 
     @property
     def ws_server(self) -> str:
@@ -225,14 +228,14 @@ class Client:
         Returns:
             The WebSocket server address.
         """
-        return f"ws{self.host[4:]}:{self.port}/jsonrpc"
+        return f"ws{self.host[4:]}:{self.port}/{self.path}"
 
     def call(
-        self,
-        method: str,
-        params: list[Any] | None = None,
-        msg_id: int | str | None = None,
-        insert_secret: bool = True,  # noqa: FBT001,FBT002
+            self,
+            method: str,
+            params: list[Any] | None = None,
+            msg_id: int | str | None = None,
+            insert_secret: bool = True,  # noqa: FBT001,FBT002
     ) -> CallReturnType:
         """Call a single JSON-RPC method.
 
@@ -258,9 +261,9 @@ class Client:
         return self.res_or_raise(self.post(payload))
 
     def batch_call(
-        self,
-        calls: CallsType,
-        insert_secret: bool = True,  # noqa: FBT001,FBT002
+            self,
+            calls: CallsType,
+            insert_secret: bool = True,  # noqa: FBT001,FBT002
     ) -> list[CallReturnType]:
         """Call multiple methods in one request.
 
@@ -382,10 +385,10 @@ class Client:
 
     @staticmethod
     def get_payload(
-        method: str,
-        params: list[Any] | None = None,
-        msg_id: int | str | None = None,
-        as_json: bool = True,  # noqa: FBT001,FBT002
+            method: str,
+            params: list[Any] | None = None,
+            msg_id: int | str | None = None,
+            as_json: bool = True,  # noqa: FBT001,FBT002
     ) -> str | dict:
         """Build a payload.
 
@@ -425,10 +428,10 @@ class Client:
         return [_ for _ in args if _ is not None]
 
     def add_uri(
-        self,
-        uris: list[str],
-        options: dict | None = None,
-        position: int | None = None,
+            self,
+            uris: list[str],
+            options: dict | None = None,
+            position: int | None = None,
     ) -> str:
         """Add a new download.
 
@@ -475,11 +478,11 @@ class Client:
         return self.call(self.ADD_URI, params=[uris, options, position])  # type: ignore
 
     def add_torrent(
-        self,
-        torrent: str,
-        uris: list[str],
-        options: dict | None = None,
-        position: int | None = None,
+            self,
+            torrent: str,
+            uris: list[str],
+            options: dict | None = None,
+            position: int | None = None,
     ) -> str:
         """Add a BitTorrent download.
 
@@ -539,10 +542,10 @@ class Client:
         return self.call(self.ADD_TORRENT, [torrent, uris, options, position])  # type: ignore
 
     def add_metalink(
-        self,
-        metalink: str,
-        options: dict | None = None,
-        position: int | None = None,
+            self,
+            metalink: str,
+            options: dict | None = None,
+            position: int | None = None,
     ) -> list[str]:
         """Add a Metalink download.
 
@@ -1204,12 +1207,12 @@ class Client:
         return self.call(self.CHANGE_POSITION, [gid, pos, how])  # type: ignore
 
     def change_uri(
-        self,
-        gid: str,
-        file_index: int,
-        del_uris: list[str],
-        add_uris: list[str],
-        position: int | None = None,
+            self,
+            gid: str,
+            file_index: int,
+            del_uris: list[str],
+            add_uris: list[str],
+            position: int | None = None,
     ) -> list[int]:
         """Remove the URIs in `del_uris` from and appends the URIs in `add_uris` to download denoted by gid.
 
@@ -1735,15 +1738,15 @@ class Client:
 
     # notifications
     def listen_to_notifications(
-        self,
-        on_download_start: Callable | None = None,
-        on_download_pause: Callable | None = None,
-        on_download_stop: Callable | None = None,
-        on_download_complete: Callable | None = None,
-        on_download_error: Callable | None = None,
-        on_bt_download_complete: Callable | None = None,
-        timeout: int = 5,
-        handle_signals: bool = True,  # noqa: FBT001,FBT002
+            self,
+            on_download_start: Callable | None = None,
+            on_download_pause: Callable | None = None,
+            on_download_stop: Callable | None = None,
+            on_download_complete: Callable | None = None,
+            on_download_error: Callable | None = None,
+            on_bt_download_complete: Callable | None = None,
+            timeout: int = 5,
+            handle_signals: bool = True,  # noqa: FBT001,FBT002
     ) -> None:
         """Start listening to aria2 notifications via WebSocket.
 
